@@ -13,6 +13,38 @@ interface DashboardProps {
 export const Dashboard: React.FC<DashboardProps> = ({ expenses }) => {
   const summary = calculateSpendingSummary(expenses);
 
+  const handleExportCSV = () => {
+    // Create CSV header
+    const headers = ['Date', 'Category', 'Amount', 'Description'];
+
+    // Create CSV rows
+    const rows = expenses.map(expense => [
+      expense.date,
+      expense.category,
+      expense.amount.toString(),
+      `"${expense.description.replace(/"/g, '""')}"` // Escape quotes in description
+    ]);
+
+    // Combine header and rows
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row => row.join(','))
+    ].join('\n');
+
+    // Create blob and download
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+
+    link.setAttribute('href', url);
+    link.setAttribute('download', `expenses_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const summaryCards = [
     {
       title: 'Total Spending',
@@ -44,6 +76,17 @@ export const Dashboard: React.FC<DashboardProps> = ({ expenses }) => {
 
   return (
     <div className="space-y-6">
+      {/* Export Button */}
+      <div className="flex justify-end">
+        <button
+          onClick={handleExportCSV}
+          disabled={expenses.length === 0}
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+        >
+          Export Data
+        </button>
+      </div>
+
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {summaryCards.map((card, index) => (
