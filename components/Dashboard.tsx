@@ -1,10 +1,11 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Expense } from '@/types/expense';
 import { calculateSpendingSummary } from '@/utils/calculations';
 import { formatCurrency } from '@/utils/currency';
 import { Card } from './ui/Card';
+import { ExportHub } from './ExportHub';
 
 interface DashboardProps {
   expenses: Expense[];
@@ -12,6 +13,7 @@ interface DashboardProps {
 
 export const Dashboard: React.FC<DashboardProps> = ({ expenses }) => {
   const summary = calculateSpendingSummary(expenses);
+  const [isExportHubOpen, setIsExportHubOpen] = useState(false);
 
   const summaryCards = [
     {
@@ -44,6 +46,20 @@ export const Dashboard: React.FC<DashboardProps> = ({ expenses }) => {
 
   return (
     <div className="space-y-6">
+      {/* Cloud Export Hub Button */}
+      <div className="flex justify-end">
+        <button
+          onClick={() => setIsExportHubOpen(true)}
+          className="px-6 py-3 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 text-white rounded-xl hover:from-indigo-700 hover:via-purple-700 hover:to-pink-600 transition-all shadow-lg hover:shadow-xl flex items-center font-semibold group"
+        >
+          <svg className="w-5 h-5 mr-2 group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
+          </svg>
+          Open Export Hub
+          <span className="ml-2 px-2 py-0.5 bg-white bg-opacity-20 rounded-full text-xs">Cloud</span>
+        </button>
+      </div>
+
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {summaryCards.map((card, index) => (
@@ -98,6 +114,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ expenses }) => {
           </p>
         )}
       </Card>
+
+      {/* Export Hub Modal */}
+      <ExportHub
+        expenses={expenses}
+        isOpen={isExportHubOpen}
+        onClose={() => setIsExportHubOpen(false)}
+      />
     </div>
   );
 };
