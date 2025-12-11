@@ -30,13 +30,25 @@ jobs:
     - name: Run linter
       run: npm run lint
 
+    - name: Check if tests exist
+      id: check-tests
+      run: |
+        if grep -q '"test"' package.json; then
+          echo "has_tests=true" >> $GITHUB_OUTPUT
+        else
+          echo "has_tests=false" >> $GITHUB_OUTPUT
+        fi
+
     - name: Run tests
+      if: steps.check-tests.outputs.has_tests == 'true'
       run: npm test
 
     - name: Generate coverage report
+      if: steps.check-tests.outputs.has_tests == 'true'
       run: npm run test:coverage
 
     - name: Upload coverage to Codecov
+      if: steps.check-tests.outputs.has_tests == 'true'
       uses: codecov/codecov-action@v3
       with:
         files: ./coverage/lcov.info
